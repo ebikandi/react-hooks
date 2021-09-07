@@ -19,13 +19,19 @@ const STATUS = {
 
 function PokemonInfo({pokemonName}) {
   // 🐨 Have state for the pokemon (null)
-  const [pokemon, setPokemon] = React.useState(null)
-  const [error, setError] = React.useState({})
-  const [status, setStatus] = React.useState(() => STATUS.idle)
+  // const [pokemon, setPokemon] = React.useState(null)
+  // const [error, setError] = React.useState({})
+  // const [status, setStatus] = React.useState(() => STATUS.idle)
+
+  const [state, setState] = React.useState({
+    pokemon: null,
+    error: {},
+    status: STATUS.idle,
+  })
 
   React.useEffect(() => {
-    console.log('Current status', status)
-  }, [status])
+    console.log('Current status', state.status)
+  }, [state.status])
   // 🐨 use React.useEffect where the callback should be called whenever the
   // pokemon name changes.
   // 💰 DON'T FORGET THE DEPENDENCIES ARRAY!
@@ -40,26 +46,42 @@ function PokemonInfo({pokemonName}) {
       return
     }
 
-    setError({})
-    setPokemon(null)
-    setStatus(STATUS.pending)
+    // setError({})
+    // setPokemon(null)
+    // setStatus(STATUS.pending)
+    setState(prevState => ({
+      ...prevState,
+      error: {},
+      pokemon: null,
+      status: STATUS.pending,
+    }))
 
     fetchPokemon(pokemonName)
       .then(pokemonData => {
-        setStatus(STATUS.resolved)
-        setPokemon(pokemonData)
+        // setStatus(STATUS.resolved)
+        // setPokemon(pokemonData)
+        setState(prevState => ({
+          ...prevState,
+          pokemon: pokemonData,
+          status: STATUS.resolved,
+        }))
       })
       .catch(error => {
-        setError(error)
-        setStatus(STATUS.rejected)
+        // setError(error)
+        // setStatus(STATUS.rejected)
+        setState(prevState => ({
+          ...prevState,
+          status: STATUS.rejected,
+          error,
+        }))
       })
   }, [pokemonName])
 
-  if (error.message) {
+  if (state.error.message) {
     return (
       <div role="alert">
         There was an error:{' '}
-        <pre style={{whiteSpace: 'normal'}}>{error.message}</pre>
+        <pre style={{whiteSpace: 'normal'}}>{state.error.message}</pre>
       </div>
     )
   }
@@ -67,11 +89,11 @@ function PokemonInfo({pokemonName}) {
   if (!Boolean(pokemonName)) {
     return 'Submit a pokemon'
   }
-  if (!pokemon) {
+  if (!state.pokemon) {
     return <PokemonInfoFallback name={pokemonName} />
   }
 
-  return <PokemonDataView pokemon={pokemon} />
+  return <PokemonDataView pokemon={state.pokemon} />
   // 🐨 return the following things based on the `pokemon` state and `pokemonName` prop:
   //   1. no pokemonName: 'Submit a pokemon'
   //   2. pokemonName but no pokemon: <PokemonInfoFallback name={pokemonName} />
