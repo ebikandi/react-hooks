@@ -3,6 +3,7 @@
 
 import {check} from 'prettier'
 import * as React from 'react'
+import {ErrorBoundary} from 'react-error-boundary'
 // 🐨 you'll want the following additional things from '../pokemon':
 // fetchPokemon: the function we call to get the pokemon info
 // PokemonInfoFallback: the thing we show while we're loading the pokemon info
@@ -15,6 +16,10 @@ const STATUS = {
   pending: 'pending', //  request started
   resolved: 'resolved', //  request successful
   rejected: 'rejected', //  request failed
+}
+
+function FallbackComponent({error}) {
+  return <h1>{error.message}</h1>
 }
 
 function PokemonInfo({pokemonName}) {
@@ -78,12 +83,13 @@ function PokemonInfo({pokemonName}) {
   }, [pokemonName])
 
   if (state.error.message) {
-    return (
-      <div role="alert">
-        There was an error:{' '}
-        <pre style={{whiteSpace: 'normal'}}>{state.error.message}</pre>
-      </div>
-    )
+    throw new Error(state.error.message)
+    // return (
+    //   <div role="alert">
+    //     There was an error:
+    //     <pre style={{whiteSpace: 'normal'}}>{state.error.message}</pre>
+    //   </div>
+    // )
   }
 
   if (!Boolean(pokemonName)) {
@@ -109,11 +115,13 @@ function App() {
 
   return (
     <div className="pokemon-info-app">
-      <PokemonForm pokemonName={pokemonName} onSubmit={handleSubmit} />
-      <hr />
-      <div className="pokemon-info">
-        <PokemonInfo pokemonName={pokemonName} />
-      </div>
+      <ErrorBoundary FallbackComponent={FallbackComponent}>
+        <PokemonForm pokemonName={pokemonName} onSubmit={handleSubmit} />
+        <hr />
+        <div className="pokemon-info">
+          <PokemonInfo pokemonName={pokemonName} />
+        </div>
+      </ErrorBoundary>
     </div>
   )
 }
